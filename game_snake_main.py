@@ -1,19 +1,3 @@
-
-'''
---------------------------------------------------------------------------
-------- SNAKE GAME -------------------------------------------------------
-------- Coceptos básicos de PDI-------------------------------------------
-------- Por: Cristiam Loaiza    cristiam.loaiza@udea.edu.co --------------
---------------------------------------------------------------------------
------------- Robinson Jaramillo robinson.jaramillov@udea.edu.co ----------
---------------------------------------------------------------------------
--------      Estudiantes de Ingenieria Electronica  ----------------------
--------      Universidad de Antioquia, Medellin --------------------------
-------- Curso Básico de Procesamiento de Imágenes y Visión Artificial-----
---------------------------------------------------------------------------
---------------------------------------------------------------------------
-'''
-
 '''
 --------------------------------------------------------------------------
 --1. Importacion de Librerias---------------------------------------------
@@ -35,8 +19,6 @@ from pygame.locals import *
 
 
 FPS = 7                                         #Inicializacion de la velocidad del Juego(fotogramas por segundo)
-#WINDOWWIDTH = 640
-#WINDOWHEIGHT = 480
 WINDOWWIDTH = 640                               #Ancho de la pantalla del juego
 WINDOWHEIGHT = 400                              #Inicializacion del alto de la pantalla de juego
 CELLSIZE = 20                                   #Tamano de cada celda de la grilla.
@@ -84,7 +66,7 @@ def main():
     FPSCLOCK = pygame.time.Clock()                  #metodo que permite obtener los frames por segundo del display
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))      #inicializacion del display, Tamanos
     BASICFONT = pygame.font.Font('freesansbold.ttf', 18)    #Tipo de letra y tamano
-    pygame.display.set_caption('Snake Game')                #Titulo de la ventana del juego
+    pygame.display.set_caption('Snake')                #Titulo de la ventana del juego
 
     showStartScreen()       #Funcion el mensaje de bienvenida del juego
     while True:
@@ -112,6 +94,10 @@ def runGame():
     camera.colorMask = (0, 0, 255)   #Definir el color del contorno de color rojo
     camera.font = cv.FONT_HERSHEY_SIMPLEX   #Definicion del tipo de letra para las coordenadas del centroide
     # coordenadas
+
+    obstacle = getRandomLocation()
+
+
     while True:  # main game loop
         ret, frame = capture.read()     #Captur.read() retorna si el marco/frame  fue leido correctamente con un true o falsey ademas retorna el marco/frame del video
         frame = frame[0:320, 0:600]     #Para evitar un marco grande se redefine el tamano a visualizar
@@ -174,10 +160,23 @@ def runGame():
                 return  # game over
 
 
+
         if wormCoords[HEAD]['x'] == apple['x'] and wormCoords[HEAD]['y'] == apple['y']: #Se verifica si la culebrita se ha comido una manzana
             apple = getRandomLocation()  # coloca una nueva manzana en una posicion aleatoria
         else:
             del wormCoords[-1]  # Elimina la cola del segmento
+
+
+        if wormCoords[HEAD]['x'] == obstacle['x'] and wormCoords[HEAD]['y'] == obstacle['y']: #Se verifica si la culebrita se ha comido una manzana
+            return
+        if wormCoords[HEAD]['x'] == obstacle['x'] and wormCoords[HEAD]['y'] == obstacle['y'] + CELLSIZE*2:  # Se verifica si la culebrita se ha comido una manzana
+            return
+        if wormCoords[HEAD]['x'] == obstacle['x'] + CELLSIZE and wormCoords[HEAD]['y'] == obstacle['y']:  # Se verifica si la culebrita se ha comido una manzana
+            return
+        if wormCoords[HEAD]['x'] == obstacle['x'] and wormCoords[HEAD]['y'] == obstacle['y']+ CELLSIZE *6:  # Se verifica si la culebrita se ha comido una manzana
+            return
+
+
 
         # mueve la culebrita agregando un segmento en la dirección en que se mueve
         if direction == UP:   #verifica si la direccion de movimiento es hacia arriba
@@ -193,6 +192,8 @@ def runGame():
         drawGrid()                    # metodo que dibuja las grillas del display
         drawWorm(wormCoords)          #metodo que dibuja el gusano con las coordenadas
         drawApple(apple)              # metodo que dibuja la manzana
+        #revisar
+        draw_obstacle(obstacle)
         drawScore(len(wormCoords) - 3)    #metodo que dibuja el puntaje
         pygame.display.update()           #metodo que actualiza el display con los nuevos metodos
         FPSCLOCK.tick(FPS)
@@ -320,8 +321,19 @@ def drawApple(coord):
     x = coord['x'] * CELLSIZE   #se multiplica el valor unitario aleatorio x por el tamano de la celda
     y = coord['y'] * CELLSIZE   #se multiplica el valor unitario aleatorio y por el tamano de la celda
     appleRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)  #Dibuja el contorno dle cuadrado con las coordenadas
-    pygame.draw.rect(DISPLAYSURF, RED, appleRect)      #rellena el cuadradado (manzana)
+    pygame.draw.rect(DISPLAYSURF, GREEN, appleRect)      #rellena el cuadradado (manzana)
 
+def draw_obstacle(coord):
+    x = coord['x'] * CELLSIZE   #se multiplica el valor unitario aleatorio x por el tamano de la celda
+    y = coord['y'] * CELLSIZE   #se multiplica el valor unitario aleatorio y por el tamano de la celda
+    obstacle_rect_1 = pygame.Rect(x, y, CELLSIZE, CELLSIZE)  #Dibuja el contorno dle cuadrado con las coordenadas
+    obstacle_rect_2 = pygame.Rect(x, y+CELLSIZE*2, CELLSIZE, CELLSIZE)  # Dibuja el contorno dle cuadrado con las coordenadas
+    obstacle_rect_3 = pygame.Rect(x + CELLSIZE, y, CELLSIZE, CELLSIZE)  # Dibuja el contorno dle cuadrado con las coordenadas
+    obstacle_rect_4 = pygame.Rect(x, y + CELLSIZE * 6, CELLSIZE,CELLSIZE)  # Dibuja el contorno dle cuadrado con las coordenadas
+    pygame.draw.rect(DISPLAYSURF, YELLOW, obstacle_rect_1)
+    pygame.draw.rect(DISPLAYSURF, YELLOW, obstacle_rect_2)
+    pygame.draw.rect(DISPLAYSURF, YELLOW, obstacle_rect_3)
+    pygame.draw.rect(DISPLAYSURF, YELLOW, obstacle_rect_4)
 
 def drawGrid():
     for x in range(0, WINDOWWIDTH, CELLSIZE):  # Ciclo que Dibuja las lineas verticales
